@@ -5,7 +5,9 @@ export class RouterService {
   private mapping: Record<string, string>;
 
   constructor() {
-    const mappingStr = process.env.TARGET_MAPPING || "{}";
+    let mappingStr = process.env.TARGET_MAPPING || "{}";
+    // Strip surrounding quotes that some env file parsers include literally
+    mappingStr = mappingStr.replace(/^['"]|['"]$/g, "");
     try {
       this.mapping = JSON.parse(mappingStr);
     } catch (e) {
