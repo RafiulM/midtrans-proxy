@@ -5,14 +5,21 @@ export class RouterService {
   private mapping: Record<string, string>;
 
   constructor() {
-    let mappingStr = process.env.TARGET_MAPPING || "{}";
-    // Strip surrounding quotes that some env file parsers include literally
-    mappingStr = mappingStr.replace(/^['"]|['"]$/g, "");
+    const mappingStr = process.env.TARGET_MAPPING || "{}";
     try {
       this.mapping = JSON.parse(mappingStr);
-    } catch (e) {
-      console.error("Failed to parse TARGET_MAPPING env var", e);
+    } catch {
+      // Support simple format: key=url,key2=url2
       this.mapping = {};
+      for (const pair of mappingStr.split(",")) {
+        const idx = pair.indexOf("=");
+        if (idx > 0) {
+          const key = pair.slice(0, idx).trim();
+          const value = pair.slice(idx + 1).trim();
+          this.mapping[key] = value;
+        }
+      }
+      console.log("Parsed TARGET_MAPPING:", this.mapping);
     }
   }
 
